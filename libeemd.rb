@@ -3,12 +3,22 @@ class Libeemd < Formula
   homepage "https://bitbucket.org/luukko/libeemd"
   url "https://bitbucket.org/luukko/libeemd/get/v1.4.tar.gz"
   sha256 "c484f4287f4469f3ac100cf4ecead8fd24bf43854efa63650934dd698d6b298b"
+  head "https://bitbucket.org/luukko/libeemd.git"
+  # doi "10.1007/s00180-015-0603-9"
 
   depends_on "gsl"
   depends_on "pkg-config" => :build
 
   needs :openmp
 
+  # The patch fixes the Makefile build option to use the -dynamiclib
+  # option instead of the -shared option when making a macOS dynamic
+  # link library and also fixes the dynamic link library suffix name
+  # to follow the name convention used in macOS. Since the original
+  # Makefile does not support multi-platform configuration, we handle
+  # this with a local patch until the original author switches to use
+  # autoconf or some other flexible build environment adaptation
+  # tools.
   patch :DATA
 
   def install
@@ -81,13 +91,7 @@ __END__
  
  uninstall:
  	@echo "$$uninstall_msg"
-@@ -44,14 +44,14 @@
- 	mkdir -p obj
- 
- obj/eemd.o: src/eemd.c src/eemd.h | obj
--	gcc $(commonflags) -c $< $(gsl_flags) -o $@
-+	$(CC) $(commonflags) -c $< $(gsl_flags) -o $@
- 
+@@ -49,9 +49,9 @@
  libeemd.a: obj/eemd.o
  	$(AR) rcs $@ $^
  
@@ -95,7 +99,7 @@ __END__
 -	gcc $(commonflags) $< -fPIC -shared -Wl,$(SONAME),$@ $(gsl_flags) -o $@
 -	ln -sf $@ libeemd.so
 +libeemd.$(version).dylib: src/eemd.c src/eemd.h
-+	$(CC) $(commonflags) $< -fPIC -shared -Wl,$(SONAME),$@ $(gsl_flags) -o $@
++	gcc $(commonflags) $< -fPIC -dynamiclib -Wl,$(SONAME),$@ $(gsl_flags) -o $@
 +	ln -sf $@ libeemd.dylib
  
  eemd.h: src/eemd.h
