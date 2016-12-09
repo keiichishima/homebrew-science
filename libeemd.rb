@@ -4,6 +4,13 @@ class Libeemd < Formula
   url "https://bitbucket.org/luukko/libeemd/get/v1.4.tar.gz"
   sha256 "c484f4287f4469f3ac100cf4ecead8fd24bf43854efa63650934dd698d6b298b"
   head "https://bitbucket.org/luukko/libeemd.git"
+  bottle do
+    cellar :any
+    sha256 "071ec8487eb593553d0afe62e14f53f7c9c533922e520015e3bfee9f90b152cb" => :sierra
+    sha256 "58ca938d5577cdedc26943d7badcdfe6c86a6e3710b0022bb9a4bdf74d6c1acb" => :el_capitan
+    sha256 "003419ec5ee70b9b7aa3606b4e3199e9a6427cd20689db6995519cb0a0a38d23" => :yosemite
+  end
+
   # doi "10.1007/s00180-015-0603-9"
 
   depends_on "gsl"
@@ -74,33 +81,33 @@ __END__
 @@ -23,7 +23,7 @@
  endef
  export uninstall_msg
- 
+
 -all: libeemd.so.$(version) libeemd.a eemd.h
 +all: libeemd.$(version).dylib libeemd.a eemd.h
- 
+
  clean:
- 	rm -f libeemd.so libeemd.so.$(version) libeemd.a eemd.h obj/eemd.o
+	rm -f libeemd.so libeemd.so.$(version) libeemd.a eemd.h obj/eemd.o
 @@ -34,8 +34,8 @@
- 	install -d $(PREFIX)/lib
- 	install -m644 eemd.h $(PREFIX)/include
- 	install -m644 libeemd.a $(PREFIX)/lib
+	install -d $(PREFIX)/lib
+	install -m644 eemd.h $(PREFIX)/include
+	install -m644 libeemd.a $(PREFIX)/lib
 -	install libeemd.so.$(version) $(PREFIX)/lib
 -	cp -Pf libeemd.so $(PREFIX)/lib
 +	install libeemd.$(version).dylib $(PREFIX)/lib
 +	cp -Pf libeemd.dylib $(PREFIX)/lib
- 
+
  uninstall:
- 	@echo "$$uninstall_msg"
+	@echo "$$uninstall_msg"
 @@ -49,9 +49,9 @@
  libeemd.a: obj/eemd.o
- 	$(AR) rcs $@ $^
- 
+	$(AR) rcs $@ $^
+
 -libeemd.so.$(version): src/eemd.c src/eemd.h
 -	gcc $(commonflags) $< -fPIC -shared -Wl,$(SONAME),$@ $(gsl_flags) -o $@
 -	ln -sf $@ libeemd.so
 +libeemd.$(version).dylib: src/eemd.c src/eemd.h
 +	gcc $(commonflags) $< -fPIC -dynamiclib -Wl,$(SONAME),$@ $(gsl_flags) -o $@
 +	ln -sf $@ libeemd.dylib
- 
+
  eemd.h: src/eemd.h
- 	cp $< $@
+	cp $< $@
